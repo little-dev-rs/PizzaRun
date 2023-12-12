@@ -22,6 +22,12 @@ class GameScene: SKScene {
     var lastUpdateTime: TimeInterval = 0.0
     var dt: TimeInterval = 0.0
     
+    var onGround = true
+    var velocityY: CGFloat = 0.0
+    var gravity: CGFloat = 0.6
+    var characterPosY: CGFloat =  0.0
+    
+    
     var playableRect: CGRect {
         let ratio: CGFloat
         switch UIScreen.main.nativeBounds.height {
@@ -53,6 +59,25 @@ class GameScene: SKScene {
         setupNodes()
     }
     // < >
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        if !isPaused{
+            if onGround {
+                onGround = false
+                velocityY = -25.0
+            }
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        if velocityY < -12.5{
+            velocityY = -12.5
+        }
+    }
+    
+    
     override func update(_ currentTime: TimeInterval) {
         if lastUpdateTime > 0 {
             dt = currentTime - lastUpdateTime
@@ -64,6 +89,15 @@ class GameScene: SKScene {
         lastUpdateTime = currentTime
         moveCamera()
         moveCharacter()
+        
+        velocityY += gravity
+        character.position.y -= velocityY
+        
+        if character.position.y < characterPosY {
+            character.position.y = characterPosY
+            velocityY = 0.0
+            onGround = true
+        }
     }
 }
 
@@ -83,7 +117,7 @@ extension GameScene {
         for i in 0...2 {
             let background = SKSpriteNode(imageNamed: "mountns")
             background.name = "Background"
-            background.anchorPoint = CGPoint(x: 0.0, y: -1.2)//.zero
+            background.anchorPoint = CGPoint(x: 0.0, y: -0.4)//.zero
             background.position = CGPoint(x: CGFloat(i)*background.frame.width, y: 0.0) //.zero
             background.zPosition = -1
             addChild(background)
@@ -108,6 +142,8 @@ extension GameScene {
         character.zPosition = 5.0
         character.position = CGPoint(x: frame.width/2 - 100,
                                   y: ground.frame.height + character.frame.height/2)
+        
+        characterPosY = character.position.y
         addChild(character)
     }
     
