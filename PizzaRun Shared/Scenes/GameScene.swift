@@ -23,6 +23,12 @@ class GameScene: SKScene {
     var lastUpdateTime: TimeInterval = 0.0
     var dt: TimeInterval = 0.0
     
+    var onGround = true
+    var velocityY: CGFloat = 0.0
+    var gravity: CGFloat = 0.6
+    var characterPosY: CGFloat =  0.0
+    
+    
     var playableRect: CGRect {
         let ratio: CGFloat
         switch UIScreen.main.nativeBounds.height {
@@ -54,6 +60,25 @@ class GameScene: SKScene {
         setupNodes()
     }
     // < >
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        if !isPaused{
+            if onGround {
+                onGround = false
+                velocityY = -25.0
+            }
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        if velocityY < -12.5{
+            velocityY = -12.5
+        }
+    }
+    
+    
     override func update(_ currentTime: TimeInterval) {
         if lastUpdateTime > 0 {
             dt = currentTime - lastUpdateTime
@@ -65,6 +90,15 @@ class GameScene: SKScene {
         lastUpdateTime = currentTime
         moveCamera()
         moveCharacter()
+        
+        velocityY += gravity
+        character.position.y -= velocityY
+        
+        if character.position.y < characterPosY {
+            character.position.y = characterPosY
+            velocityY = 0.0
+            onGround = true
+        }
     }
 }
 
@@ -95,7 +129,7 @@ extension GameScene {
     }
     
     func createGround() {
-        for i in 0...2 {
+        for i in 0...4 {
             ground = SKSpriteNode(imageNamed: "ground1")
             ground.name = "Ground"
             ground.anchorPoint = .zero
@@ -113,6 +147,7 @@ extension GameScene {
         character.zPosition = 5.0
         character.position = CGPoint(x: frame.width/2 - 100,
                                   y: ground.frame.height + character.frame.height/2 - 20)
+        characterPosY = character.position.y
         addChild(character)
     }
     
@@ -140,7 +175,7 @@ extension GameScene {
             let node = node as! SKSpriteNode
             
             if node.position.x + node.frame.width < self.cameraRect.origin.x {
-                node.position = CGPoint(x: node.position.x + node.frame.width * 2, y: node.position.y)
+                node.position = CGPoint(x: node.position.x + node.frame.width * 3, y: node.position.y)
             }
         }
         
