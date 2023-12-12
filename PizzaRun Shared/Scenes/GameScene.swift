@@ -14,8 +14,9 @@ class GameScene: SKScene {
     var ground: SKSpriteNode!
     var character: SKSpriteNode!
     var cameraNode = SKCameraNode()
-    var characterTextures: [SKTexture] = [] // may be delete it
+    var characterTextures: [SKTexture] = []
     var obstacles: [SKSpriteNode] = []
+    var clouds: [SKSpriteNode] = []
     
     var cameraMovePointPerSecond: CGFloat = 450.0
     
@@ -109,40 +110,43 @@ extension GameScene {
         createBackground()
         createGround()
         setupObstacles()
+        spawnObstacles()
         createCharacter()
+        setupClouds()
+        spawnClouds()
         setupCamera()
     }
     
     func createBackground() {
         for i in 0...2 {
-            let background = SKSpriteNode(imageNamed: "mountns")
+            let background = SKSpriteNode(imageNamed: "sky")
             background.name = "Background"
-            background.anchorPoint = CGPoint(x: 0.0, y: -0.4)//.zero
-            background.position = CGPoint(x: CGFloat(i)*background.frame.width, y: 0.0) //.zero
+            background.anchorPoint = .zero
+            background.position = CGPoint(x: CGFloat(i)*background.frame.width, y: 0.0)
             background.zPosition = -1
             addChild(background)
         }
     }
     
     func createGround() {
-        for i in 0...2 {
-            ground = SKSpriteNode(imageNamed: "ground")
+        for i in 0...4 {
+            ground = SKSpriteNode(imageNamed: "ground1")
             ground.name = "Ground"
             ground.anchorPoint = .zero
             ground.position = CGPoint(x: CGFloat(i)*ground.frame.width, y: 0.0)
-            ground.zPosition = 1.0
+            ground.zPosition = 4.0
             addChild(ground)
         }
 
     }
     
     func createCharacter() {
-        character = SKSpriteNode(imageNamed: "cook_1")
+        character = SKSpriteNode(imageNamed: "cook1")
         character.name = "Player"
+        character.setScale(3)
         character.zPosition = 5.0
         character.position = CGPoint(x: frame.width/2 - 100,
-                                  y: ground.frame.height + character.frame.height/2)
-        
+                                  y: ground.frame.height + character.frame.height/2 - 20)
         characterPosY = character.position.y
         addChild(character)
     }
@@ -171,7 +175,7 @@ extension GameScene {
             let node = node as! SKSpriteNode
             
             if node.position.x + node.frame.width < self.cameraRect.origin.x {
-                node.position = CGPoint(x: node.position.x + node.frame.width * 2, y: node.position.y)
+                node.position = CGPoint(x: node.position.x + node.frame.width * 3, y: node.position.y)
             }
         }
         
@@ -182,7 +186,7 @@ extension GameScene {
         
         // Load character textures for animation
          for i in 1...3 {
-             let texture = SKTexture(imageNamed: "cook_\(i)")
+             let texture = SKTexture(imageNamed: "cook\(i)")
              characterTextures.append(texture)
          }
         
@@ -194,8 +198,110 @@ extension GameScene {
         character.position.x += amountToMove
     }
     
-    func setupObstacles() {
+    func setupClouds() {
+        for _ in 1...3 {
+            let sprite = SKSpriteNode(imageNamed: "cloud1")
+            sprite.name = "Cloud"
+            sprite.setScale(2)
+            clouds.append(sprite)
+        }
         
+        for _ in 1...3 {
+            let sprite = SKSpriteNode(imageNamed: "cloud2")
+            sprite.name = "Cloud"
+            sprite.setScale(2)
+            clouds.append(sprite)
+        }
+        
+        let index = Int(arc4random_uniform(UInt32(clouds.count - 1)))
+        let sprite = clouds[index].copy() as! SKSpriteNode
+        sprite.zPosition = 2.0
+        sprite.setScale(10)
+        let randomYPosition = Double(CGFloat.random(in: 500...700))
+        sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
+                                  y: ground.frame.height + randomYPosition)
+        addChild(sprite)
+    }
+    
+    func spawnClouds() {
+        let random = Double(CGFloat.random(in: 1.5 ... 3))
+        run(.repeatForever(.sequence([
+            .wait(forDuration: random),
+            .run { [weak self] in
+                self?.setupClouds()
+            }
+        ])))
+    }
+    
+    func setupObstacles() {
+
+        for _ in 1...3 {
+            let sprite = SKSpriteNode(imageNamed: "tomato")
+            sprite.name = "Tomato"
+            sprite.setScale(2)
+            obstacles.append(sprite)
+        }
+//        
+//        for _ in 1...3 {
+//            let sprite = SKSpriteNode(imageNamed: "pizza")
+//            sprite.name = "Pizza"
+//            sprite.setScale(2)
+//            obstacles.append(sprite)
+//        }
+//        
+//        for _ in 1...3 {
+//            let sprite = SKSpriteNode(imageNamed: "cheese")
+//            sprite.name = "Cheese"
+//            sprite.setScale(2)
+//            obstacles.append(sprite)
+//        }
+//        
+//        for _ in 1...3 {
+//            let sprite = SKSpriteNode(imageNamed: "provola")
+//            sprite.name = "Provola"
+//            sprite.setScale(2)
+//            obstacles.append(sprite)
+//        }
+
+        for _ in 1...3 {
+            let sprite = SKSpriteNode(imageNamed: "basil")
+            sprite.name = "Basil"
+            sprite.setScale(2)
+            obstacles.append(sprite)
+        }
+        
+        for _ in 1...2 {
+            let sprite = SKSpriteNode(imageNamed: "knife")
+            sprite.name = "Knife"
+            sprite.setScale(0.5)
+            obstacles.append(sprite)
+        }
+        
+        for _ in 1...2 {
+            let sprite = SKSpriteNode(imageNamed: "ananas")
+            sprite.name = "Ananas"
+            sprite.setScale(3)
+            obstacles.append(sprite)
+        }
+        
+        let index = Int(arc4random_uniform(UInt32(obstacles.count - 1)))
+        let sprite = obstacles[index].copy() as! SKSpriteNode
+        sprite.zPosition = 4.0
+        let randomYPosition = Double(CGFloat.random(in: 50 ... 500))
+        sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
+                                  y: ground.frame.height + randomYPosition)
+        addChild(sprite)
+        
+    }
+    
+    func spawnObstacles() {
+        let random = Double(CGFloat.random(in: 1.5 ... 3))
+        run(.repeatForever(.sequence([
+            .wait(forDuration: random),
+            .run { [weak self] in
+                self?.setupObstacles()
+            }
+        ])))
     }
     
 }
