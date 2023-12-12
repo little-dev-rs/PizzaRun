@@ -14,7 +14,6 @@ class GameScene: SKScene {
     var ground: SKSpriteNode!
     var character: SKSpriteNode!
     var cameraNode = SKCameraNode()
-    var characterTextures: [SKTexture] = []
     var obstacles: [SKSpriteNode] = []
     var clouds: [SKSpriteNode] = []
     
@@ -22,6 +21,7 @@ class GameScene: SKScene {
     
     var lastUpdateTime: TimeInterval = 0.0
     var dt: TimeInterval = 0.0
+    var playTime: CGFloat = 3.0
     
     var onGround = true
     var velocityY: CGFloat = 0.0
@@ -59,7 +59,6 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         setupNodes()
     }
-    // < >
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
@@ -109,7 +108,6 @@ extension GameScene {
     func setupNodes() {
         createBackground()
         createGround()
-        setupObstacles()
         spawnObstacles()
         createCharacter()
         setupClouds()
@@ -146,9 +144,16 @@ extension GameScene {
         character.setScale(3)
         character.zPosition = 5.0
         character.position = CGPoint(x: frame.width/2 - 100,
-                                  y: ground.frame.height + character.frame.height/2 - 20)
+                                  y: ground.frame.height + character.frame.height/2 - 25)
         characterPosY = character.position.y
         addChild(character)
+
+        var textures: [SKTexture] = []
+        for i in 1...9 {
+            let texture = SKTexture(imageNamed: "cook\(i)")
+            textures.append(texture)
+        }
+        character.run(.repeatForever(.animate(with: textures, timePerFrame: 0.083)))
     }
     
     func setupCamera() {
@@ -183,18 +188,6 @@ extension GameScene {
     
     func moveCharacter() {
         let amountToMove = cameraMovePointPerSecond * CGFloat(dt)
-        
-        // Load character textures for animation
-         for i in 1...3 {
-             let texture = SKTexture(imageNamed: "cook\(i)")
-             characterTextures.append(texture)
-         }
-        
-        // Run the character animation
-         let animationAction = SKAction.animate(with: characterTextures, timePerFrame: 0.2)
-         let repeatAction = SKAction.repeatForever(animationAction)
-        character.run(repeatAction)
-        
         character.position.x += amountToMove
     }
     
@@ -217,14 +210,14 @@ extension GameScene {
         let sprite = clouds[index].copy() as! SKSpriteNode
         sprite.zPosition = 2.0
         sprite.setScale(10)
-        let randomYPosition = Double(CGFloat.random(in: 500...700))
+        let randomYPosition = Double(CGFloat.random(in: 500...600))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
         addChild(sprite)
     }
     
     func spawnClouds() {
-        let random = Double(CGFloat.random(in: 1.5 ... 3))
+        let random = Double(CGFloat.random(in: 1.5 ... 2))
         run(.repeatForever(.sequence([
             .wait(forDuration: random),
             .run { [weak self] in
@@ -291,17 +284,40 @@ extension GameScene {
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
         addChild(sprite)
-        
+        sprite.run(.sequence([
+            .wait(forDuration: 10.0),
+            .removeFromParent()
+        ]))
     }
     
     func spawnObstacles() {
-        let random = Double(CGFloat.random(in: 1.5 ... 3))
+        // wait on start
+        run(.wait(forDuration: 5))
+        
+        let random = Double(CGFloat.random(in: 1.5 ... 3))//playTime))
         run(.repeatForever(.sequence([
             .wait(forDuration: random),
             .run { [weak self] in
                 self?.setupObstacles()
+                
+//                self?.playTime -= 0.01
+//
+//                if CGFloat(self?.playTime ?? 0.0) <= 1.0 {
+//                    self?.playTime = 1.0
+//                }
             }
         ])))
+        
+//        run(.repeatForever(.sequence([
+//            .wait(forDuration: 5.0),
+//            .run {
+//                self.playTime -= 0.01
+//
+//                if self.playTime <= 1.0 {
+//                    self.playTime = 1.0
+//                }
+//            }
+//        ])))
     }
     
 }
