@@ -118,7 +118,7 @@ extension GameScene {
     }
     
     func setupCounter() {
-        
+        print("hello")
     }
     
     func createBackground() {
