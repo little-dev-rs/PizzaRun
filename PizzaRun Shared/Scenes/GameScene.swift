@@ -114,6 +114,11 @@ extension GameScene {
         setupClouds()
         spawnClouds()
         setupCamera()
+        setupCounter()
+    }
+    
+    func setupCounter() {
+        
     }
     
     func createBackground() {
