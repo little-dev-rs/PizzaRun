@@ -29,6 +29,13 @@ class GameScene: SKScene {
     var gravity: CGFloat = 0.6
     var characterPosY: CGFloat =  0.0
     
+    var numScore: Int = 0
+    var gameOver = false
+    var life: Int = 3
+    
+    var lifeNodes: [SKSpriteNode] = []
+    var scoreLbl = SKLabelNode(fontNamed: "Krungthep" )
+    var coinIcon: SKSpriteNode!
     
     var playableRect: CGRect {
         let ratio: CGFloat
@@ -114,6 +121,8 @@ extension GameScene {
         setupClouds()
         spawnClouds()
         setupCamera()
+        setupLife()
+        setupScore()
         setupCounter()
     }
     
@@ -311,6 +320,27 @@ extension GameScene {
             .wait(forDuration: 10.0),
             .removeFromParent()
         ]))
+    }
+    
+    func setupLife() {
+        let node1 = SKSpriteNode(imageNamed: "ananas" )
+        let node2 = SKSpriteNode(imageNamed: "ananas" )
+        let node3 = SKSpriteNode(imageNamed: "ananas" )
+        setupLifePos (node1, iteration: 1.0)
+        setupLifePos (node2, iteration: 2.0)
+        setupLifePos (node3, iteration: 3.0)
+    }
+    
+    func setupLifePos(_ node: SKSpriteNode, iteration: CGFloat) {
+        node.setScale(2)
+        node.zPosition = 50.0
+        node.anchorPoint = .zero
+        node.position = CGPoint(x: -size.width / 2.0 + node.frame.width*iteration + 8*iteration, y: 300)
+        cameraNode.addChild(node)
+    }
+    
+    func setupScore() {
+        
     }
     
     func spawnObstacles() {
