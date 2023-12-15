@@ -15,6 +15,9 @@ class GameScene: SKScene {
     var mount: SKSpriteNode!
     var character: SKSpriteNode!
     var cameraNode = SKCameraNode()
+    var ingridients: [SKSpriteNode] = []
+    var ananases: [SKSpriteNode] = []
+    var knifes: [SKSpriteNode] = []
     var obstacles: [SKSpriteNode] = []
     var clouds: [SKSpriteNode] = []
     
@@ -30,7 +33,6 @@ class GameScene: SKScene {
     var characterPosY: CGFloat =  0.0
     var pauseNode: SKSpriteNode!
     var containerNode = SKNode()
-    
     
     var playableRect: CGRect {
         let ratio: CGFloat
@@ -135,14 +137,10 @@ extension GameScene {
         spawnClouds()
         setupPause()
         setupCamera()
-        
-      
-        
-        
-        
-        
+
+        physicsWorld.contactDelegate = self
     }
- 
+    
     func setupPause() {
         pauseNode = SKSpriteNode(imageNamed: "pause")
         pauseNode.setScale (0.5)
@@ -169,15 +167,12 @@ extension GameScene {
         resume.position = CGPoint(x: -panel.frame.width/2.0 + resume.frame.width*1.5, y: 0.0)
         panel.addChild(resume)
         
-        
         let quit = SKSpriteNode(imageNamed: "back")
         quit.zPosition = 70.0
         quit.name = "quit"
         quit.setScale(0.7)
         quit.position = CGPoint(x: panel.frame.width/2.0 - quit.frame.width*1.5, y: 0.0)
         panel.addChild(quit)
-        
-        
     }
         
     func createBackground() {
@@ -198,9 +193,12 @@ extension GameScene {
             ground.anchorPoint = .zero
             ground.position = CGPoint(x: CGFloat(i)*ground.frame.width, y: 0.0)
             ground.zPosition = 4.0
+            ground.physicsBody = SKPhysicsBody(rectangleOf: ground.size)
+            ground.physicsBody?.isDynamic = false
+            ground.physicsBody?.affectedByGravity = false
+            ground.physicsBody?.categoryBitMask = PhysicsCategory.Ground
             addChild(ground)
         }
-
     }
     
     func createMount() {
@@ -212,12 +210,6 @@ extension GameScene {
             mount.zPosition = 6.0
             addChild(mount)
         }
-//        mount = SKSpriteNode(imageNamed: "mountns")
-//        mount.name = "Mount"
-//        mount.anchorPoint = .zero
-//        mount.position = CGPoint(x: mount.frame.width, y: 0.0)
-//        mount.zPosition = 6.0
-//        addChild(mount)
     }
     
     func createCharacter() {
@@ -228,6 +220,14 @@ extension GameScene {
         character.position = CGPoint(x: frame.width/2 - 100,
                                   y: ground.frame.height + character.frame.height/2 - 25)
         characterPosY = character.position.y
+
+        character.physicsBody = SKPhysicsBody(rectangleOf: character.size)
+        character.physicsBody?.allowsRotation = false
+        character.physicsBody?.restitution = 0.0
+        character.physicsBody?.affectedByGravity = false
+        character.physicsBody?.categoryBitMask = PhysicsCategory.Character
+        character.physicsBody?.contactTestBitMask = PhysicsCategory.Ananas// | PhysicsCategory.Obstacle | PhysicsCategory.Knife // add more
+        
         addChild(character)
 
         var textures: [SKTexture] = []
@@ -307,51 +307,33 @@ extension GameScene {
             }
         ])))
     }
-    
-    func setupObstacles() {
 
+    func setupObstacles() {
+        
         for _ in 1...3 {
             let sprite = SKSpriteNode(imageNamed: "tomato")
             sprite.name = "Tomato"
+//            sprite.physicsBody?.categoryBitMask = PhysicsCategory.Ingridient
             sprite.setScale(2)
             obstacles.append(sprite)
         }
-//        
-//        for _ in 1...3 {
-//            let sprite = SKSpriteNode(imageNamed: "pizza")
-//            sprite.name = "Pizza"
-//            sprite.setScale(2)
-//            obstacles.append(sprite)
-//        }
-//        
-//        for _ in 1...3 {
-//            let sprite = SKSpriteNode(imageNamed: "cheese")
-//            sprite.name = "Cheese"
-//            sprite.setScale(2)
-//            obstacles.append(sprite)
-//        }
-//        
-//        for _ in 1...3 {
-//            let sprite = SKSpriteNode(imageNamed: "provola")
-//            sprite.name = "Provola"
-//            sprite.setScale(2)
-//            obstacles.append(sprite)
-//        }
-
+        
         for _ in 1...3 {
             let sprite = SKSpriteNode(imageNamed: "basil")
             sprite.name = "Basil"
+//            sprite.physicsBody?.categoryBitMask = PhysicsCategory.Ingridient
             sprite.setScale(2)
             obstacles.append(sprite)
         }
-        
+
         for _ in 1...1 {
             let sprite = SKSpriteNode(imageNamed: "knife")
             sprite.name = "Knife"
+            sprite.physicsBody?.categoryBitMask = PhysicsCategory.Knife
             sprite.setScale(0.5)
             obstacles.append(sprite)
         }
-        
+
         for _ in 1...2 {
             let sprite = SKSpriteNode(imageNamed: "ananas")
             sprite.name = "Ananas"
@@ -361,17 +343,24 @@ extension GameScene {
         
         let index = Int(arc4random_uniform(UInt32(obstacles.count - 1)))
         let sprite = obstacles[index].copy() as! SKSpriteNode
-        sprite.zPosition = 4.0
+        sprite.zPosition = 5.0
         let randomYPosition = Double(CGFloat.random(in: sprite.frame.height / 2 ... 450))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
+        
+        sprite.physicsBody = SKPhysicsBody(rectangleOf: sprite.size)
+        sprite.physicsBody?.isDynamic = false
+        sprite.physicsBody?.affectedByGravity = false
+        sprite.physicsBody?.contactTestBitMask = PhysicsCategory.Character
+        sprite.physicsBody?.categoryBitMask = PhysicsCategory.Ananas
+        
         addChild(sprite)
         sprite.run(.sequence([
             .wait(forDuration: 10.0),
             .removeFromParent()
         ]))
     }
-    
+
     func spawnObstacles() {
         // wait on start
         run(.wait(forDuration: 5))
@@ -381,25 +370,42 @@ extension GameScene {
             .wait(forDuration: random),
             .run { [weak self] in
                 self?.setupObstacles()
-                
-//                self?.playTime -= 0.01
-//
-//                if CGFloat(self?.playTime ?? 0.0) <= 1.0 {
-//                    self?.playTime = 1.0
-//                }
             }
         ])))
+    }
+    
+}
+
+extension GameScene: SKPhysicsContactDelegate {
+
+    func didBegin(_ contact: SKPhysicsContact) {
         
-//        run(.repeatForever(.sequence([
-//            .wait(forDuration: 5.0),
-//            .run {
-//                self.playTime -= 0.01
-//
-//                if self.playTime <= 1.0 {
-//                    self.playTime = 1.0
-//                }
-//            }
-//        ])))
+        let object = contact.bodyA.categoryBitMask == PhysicsCategory.Character ? contact.bodyB : contact.bodyA
+
+        switch object.categoryBitMask {
+        case PhysicsCategory.Ananas:
+            if let node = object.node {
+                node.removeFromParent()
+            }
+//            cameraMovePointPerSecond *= 150.0
+        case PhysicsCategory.Character:
+            print("test1 Character")
+        case PhysicsCategory.Knife:
+            print("test1 Knife")
+        case PhysicsCategory.Ingridient:
+            print("test1 Ingridient")
+            if let node = object.node {
+                node.removeFromParent()
+            }
+        case PhysicsCategory.Cloud:
+            print("test1 Cloud")
+        case PhysicsCategory.Ground:
+            print("test1 Ground")
+        case PhysicsCategory.Obstacle:
+            print("test1 Obstacle")
+        default:
+            print("test1 default")
+        }
     }
     
 }
