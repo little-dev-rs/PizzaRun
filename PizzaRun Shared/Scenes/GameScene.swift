@@ -28,6 +28,8 @@ class GameScene: SKScene {
     var velocityY: CGFloat = 0.0
     var gravity: CGFloat = 0.6
     var characterPosY: CGFloat =  0.0
+    var pauseNode: SKSpriteNode!
+    var containerNode = SKNode()
     
     var numScore: Int = 0
     var gameOver = false
@@ -80,10 +82,28 @@ class GameScene: SKScene {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        if !isPaused{
-            if onGround {
-                onGround = false
-                velocityY = -25.0
+        guard let touch = touches.first else { return }
+        let node = atPoint(touch.location(in: self))
+        
+        if node.name == "pause" {
+            if isPaused { return }
+            createPanel ()
+            lastUpdateTime = 0.0
+            dt = 0.0
+            isPaused = true
+            
+        } else if node.name == "resume" {
+            containerNode.removeFromParent ()
+            isPaused = false
+            
+        }else if node.name == "quit" {
+            
+        } else {
+            if !isPaused{
+                if onGround {
+                    onGround = false
+                    velocityY = -25.0
+                }
             }
         }
     }
@@ -130,18 +150,50 @@ extension GameScene {
         createCharacter()
         setupClouds()
         spawnClouds()
+        setupPause()
         setupCamera()
         setupLife()
         setupTomatoScore()
         setupBasilScore()
         setupCheeseScore()
-        setupCounter()
+    }
+ 
+    func setupPause() {
+        pauseNode = SKSpriteNode(imageNamed: "pause")
+        pauseNode.setScale (0.5)
+        pauseNode.zPosition = 10
+        pauseNode.name = "pause"
+        pauseNode.position = CGPoint(x: playableRect.width/2.0 - pauseNode.frame.width/2.0 - 60.0,
+                                     y: playableRect.height/2.0 - pauseNode.frame.height/2.0 - 150.0)
+        cameraNode.addChild(pauseNode)
     }
     
-    func setupCounter() {
-        print("hello")
+    func createPanel() {
+        cameraNode.addChild (containerNode)
+        
+        let panel = SKSpriteNode(imageNamed: "panel")
+        panel.zPosition = 20
+        panel.position = .zero
+        containerNode.addChild(panel)
+        
+        let resume = SKSpriteNode(imageNamed: "resume" )
+        resume.zPosition = 30
+        resume.name = "resume"
+        resume.setScale(0.7)
+        resume.position = CGPoint(x: -panel.frame.width/2.0 + resume.frame.width*1.5, y: 0.0)
+        panel.addChild(resume)
+        
+        
+        let quit = SKSpriteNode(imageNamed: "back")
+        quit.zPosition = 70.0
+        quit.name = "quit"
+        quit.setScale(0.7)
+        quit.position = CGPoint(x: panel.frame.width/2.0 - quit.frame.width*1.5, y: 0.0)
+        panel.addChild(quit)
+        
+        
     }
-    
+        
     func createBackground() {
         for i in 0...2 {
             let background = SKSpriteNode(imageNamed: "sky")
