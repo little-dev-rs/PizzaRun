@@ -15,11 +15,7 @@ class GameScene: SKScene {
     var mount: SKSpriteNode!
     var character: SKSpriteNode!
     var cameraNode = SKCameraNode()
-    var ingridients: [SKSpriteNode] = []
-    var ananases: [SKSpriteNode] = []
-    var knifes: [SKSpriteNode] = []
     var obstacles: [SKSpriteNode] = []
-    var clouds: [SKSpriteNode] = []
     
     var cameraMovePointPerSecond: CGFloat = 450.0
     
@@ -33,6 +29,14 @@ class GameScene: SKScene {
     var characterPosY: CGFloat =  0.0
     var pauseNode: SKSpriteNode!
     var containerNode = SKNode()
+    
+    let creator: Creator = ObjectCreator()
+    let viewModel: GameSceneVM = GameSceneVM()
+    
+    var pizzaCounter: Int = 0
+    var basilCounter: Int = 0
+    var cheeseCounter: Int = 0
+    var tomatoCounter: Int = 0
     
     var playableRect: CGRect {
         let ratio: CGFloat
@@ -84,7 +88,7 @@ class GameScene: SKScene {
         }else if node.name == "quit" {
             
         } else {
-            if !isPaused{
+            if !isPaused {
                 if onGround {
                     onGround = false
                     velocityY = -25.0
@@ -92,36 +96,7 @@ class GameScene: SKScene {
             }
         }
     }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
-        if velocityY < -12.5{
-            velocityY = -12.5
-        }
-    }
-    
-    
-    override func update(_ currentTime: TimeInterval) {
-        if lastUpdateTime > 0 {
-            dt = currentTime - lastUpdateTime
-            
-        } else {
-            dt = 0
-        }
-        
-        lastUpdateTime = currentTime
-        moveCamera()
-        moveCharacter()
-        
-        velocityY += gravity
-        character.position.y -= velocityY
-        
-        if character.position.y < characterPosY {
-            character.position.y = characterPosY
-            velocityY = 0.0
-            onGround = true
-        }
-    }
+
 }
 
 // MARK: - Configuration
@@ -153,7 +128,7 @@ extension GameScene {
     }
     
     func createPanel() {
-        cameraNode.addChild (containerNode)
+        cameraNode.addChild(containerNode)
         
         let panel = SKSpriteNode(imageNamed: "panel")
         panel.zPosition = 20
@@ -213,6 +188,8 @@ extension GameScene {
     }
     
     func createCharacter() {
+//        character = creator.createSprite(model: viewModel.character)
+
         character = SKSpriteNode(imageNamed: "cook1")
         character.name = "Player"
         character.setScale(3)
@@ -274,17 +251,8 @@ extension GameScene {
     }
     
     func setupClouds() {
-        for _ in 1...3 {
-            let sprite = SKSpriteNode(imageNamed: "cloud1")
-            sprite.name = "Cloud"
-            sprite.setScale(2)
-            clouds.append(sprite)
-        }
-
-        let index = Int(arc4random_uniform(UInt32(clouds.count - 1)))
-        let sprite = clouds[index].copy() as! SKSpriteNode
-        sprite.zPosition = 2.0
-        sprite.setScale(10)
+        let sprite = creator.createSprite(model: viewModel.cloud)
+        
         let randomYPosition = Double(CGFloat.random(in: 500...600))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
@@ -310,50 +278,19 @@ extension GameScene {
 
     func setupObstacles() {
         
-        for _ in 1...3 {
-            let sprite = SKSpriteNode(imageNamed: "tomato")
-            sprite.name = "Tomato"
-//            sprite.physicsBody?.categoryBitMask = PhysicsCategory.Ingridient
-            sprite.setScale(2)
-            obstacles.append(sprite)
-        }
-        
-        for _ in 1...3 {
-            let sprite = SKSpriteNode(imageNamed: "basil")
-            sprite.name = "Basil"
-//            sprite.physicsBody?.categoryBitMask = PhysicsCategory.Ingridient
-            sprite.setScale(2)
-            obstacles.append(sprite)
+        viewModel.obstacles.forEach { object in
+            for _ in 1...object.repeatCount {
+                let sprite = creator.createSprite(model: object)
+                obstacles.append(sprite)
+            }
         }
 
-        for _ in 1...1 {
-            let sprite = SKSpriteNode(imageNamed: "knife")
-            sprite.name = "Knife"
-            sprite.physicsBody?.categoryBitMask = PhysicsCategory.Knife
-            sprite.setScale(0.5)
-            obstacles.append(sprite)
-        }
-
-        for _ in 1...2 {
-            let sprite = SKSpriteNode(imageNamed: "ananas")
-            sprite.name = "Ananas"
-            sprite.setScale(3)
-            obstacles.append(sprite)
-        }
-        
         let index = Int(arc4random_uniform(UInt32(obstacles.count - 1)))
         let sprite = obstacles[index].copy() as! SKSpriteNode
-        sprite.zPosition = 5.0
         let randomYPosition = Double(CGFloat.random(in: sprite.frame.height / 2 ... 450))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
-        
-        sprite.physicsBody = SKPhysicsBody(rectangleOf: sprite.size)
-        sprite.physicsBody?.isDynamic = false
-        sprite.physicsBody?.affectedByGravity = false
-        sprite.physicsBody?.contactTestBitMask = PhysicsCategory.Character
-        sprite.physicsBody?.categoryBitMask = PhysicsCategory.Ananas
-        
+
         addChild(sprite)
         sprite.run(.sequence([
             .wait(forDuration: 10.0),
@@ -379,33 +316,64 @@ extension GameScene {
 extension GameScene: SKPhysicsContactDelegate {
 
     func didBegin(_ contact: SKPhysicsContact) {
-        
+        print("test1 didBegin")
         let object = contact.bodyA.categoryBitMask == PhysicsCategory.Character ? contact.bodyB : contact.bodyA
-
+        
+        print("test1 categoryBitMask \(object.categoryBitMask)")
+        if let node = object.node {
+            node.removeFromParent()
+        }
         switch object.categoryBitMask {
         case PhysicsCategory.Ananas:
-            if let node = object.node {
-                node.removeFromParent()
-            }
-//            cameraMovePointPerSecond *= 150.0
+            cameraMovePointPerSecond += 150.0
         case PhysicsCategory.Character:
             print("test1 Character")
         case PhysicsCategory.Knife:
             print("test1 Knife")
-        case PhysicsCategory.Ingridient:
+        case PhysicsCategory.Ananas:
             print("test1 Ingridient")
-            if let node = object.node {
-                node.removeFromParent()
-            }
         case PhysicsCategory.Cloud:
             print("test1 Cloud")
         case PhysicsCategory.Ground:
             print("test1 Ground")
-        case PhysicsCategory.Obstacle:
-            print("test1 Obstacle")
         default:
             print("test1 default")
         }
     }
     
+}
+
+// MARK: - Touches
+
+extension GameScene {
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        if velocityY < -12.5{
+            velocityY = -12.5
+        }
+    }
+    
+    override func update(_ currentTime: TimeInterval) {
+        if lastUpdateTime > 0 {
+            dt = currentTime - lastUpdateTime
+            
+        } else {
+            dt = 0
+        }
+        
+        lastUpdateTime = currentTime
+        moveCamera()
+        moveCharacter()
+        
+        velocityY += gravity
+        character.position.y -= velocityY
+        
+        if character.position.y < characterPosY {
+            character.position.y = characterPosY
+            velocityY = 0.0
+            onGround = true
+        }
+    }
+
 }
