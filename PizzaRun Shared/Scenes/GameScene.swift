@@ -26,7 +26,7 @@ class GameScene: SKScene {
     
     var onGround = true
     var velocityY: CGFloat = 0.0
-    var gravity: CGFloat = 0.6
+    var gravity: CGFloat = 0.8
     var characterPosY: CGFloat =  0.0
     var pauseNode: SKSpriteNode!
     var containerNode = SKNode()
@@ -128,6 +128,7 @@ extension GameScene {
     
     func setupNodes() {
         createBackground()
+        createMount()
         createGround()
         spawnObstacles()
         createCharacter()
@@ -190,7 +191,7 @@ extension GameScene {
             addChild(background)
         }
     }
-    
+  
     func createGround() {
         for i in 0...4 {
             ground = SKSpriteNode(imageNamed: "ground1")
@@ -204,20 +205,12 @@ extension GameScene {
     }
     
     func createMount() {
-        for i in 0...4 {
-            mount = SKSpriteNode(imageNamed: "mountns")
-            mount.name = "Mount"
-            mount.anchorPoint = ground.frame.origin
-            mount.position = CGPoint(x: CGFloat(i)*ground.frame.width, y: 0.0)
-            mount.zPosition = 6.0
-            addChild(mount)
-        }
-//        mount = SKSpriteNode(imageNamed: "mountns")
-//        mount.name = "Mount"
-//        mount.anchorPoint = .zero
-//        mount.position = CGPoint(x: mount.frame.width, y: 0.0)
-//        mount.zPosition = 6.0
-//        addChild(mount)
+        mount = SKSpriteNode(imageNamed: "mountns")
+        mount.name = "Mount"
+        mount.anchorPoint = .zero
+        mount.position = CGPoint(x: cameraNode.frame.width/2, y: 400)
+        mount.zPosition = 1.0
+        addChild(mount)
     }
     
     func createCharacter() {
@@ -231,7 +224,7 @@ extension GameScene {
         addChild(character)
 
         var textures: [SKTexture] = []
-        for i in 1...9 {
+        for i in 1...7 {
             let texture = SKTexture(imageNamed: "cook\(i)")
             textures.append(texture)
         }
@@ -247,6 +240,7 @@ extension GameScene {
     func moveCamera() {
         let amountToMove = CGPoint(x: cameraMovePointPerSecond * CGFloat(dt), y: 0.0)
         cameraNode.position +=  amountToMove
+        mount.position +=  amountToMove
         
         // Background
         enumerateChildNodes(withName: "Background") { (node, _) in
@@ -274,18 +268,19 @@ extension GameScene {
     }
     
     func setupClouds() {
-        for _ in 1...3 {
+        for _ in 1...4 {
             let sprite = SKSpriteNode(imageNamed: "cloud1")
             sprite.name = "Cloud"
-            sprite.setScale(2)
+            sprite.setScale(4)
             clouds.append(sprite)
+
         }
 
         let index = Int(arc4random_uniform(UInt32(clouds.count - 1)))
         let sprite = clouds[index].copy() as! SKSpriteNode
         sprite.zPosition = 2.0
-        sprite.setScale(10)
-        let randomYPosition = Double(CGFloat.random(in: 500...600))
+        sprite.setScale(0.3)
+        let randomYPosition = Double(CGFloat.random(in: 600...700))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
         addChild(sprite)
@@ -299,7 +294,7 @@ extension GameScene {
     }
     
     func spawnClouds() {
-        let random = Double(CGFloat.random(in: 1.5 ... 2))
+        let random = Double(CGFloat.random(in: 1.5 ... 6))
         run(.repeatForever(.sequence([
             .wait(forDuration: random),
             .run { [weak self] in
@@ -316,13 +311,13 @@ extension GameScene {
             sprite.setScale(2)
             obstacles.append(sprite)
         }
-//        
-//        for _ in 1...3 {
-//            let sprite = SKSpriteNode(imageNamed: "pizza")
-//            sprite.name = "Pizza"
-//            sprite.setScale(2)
-//            obstacles.append(sprite)
-//        }
+
+    //    for _ in 1...3 {
+     //       let sprite = SKSpriteNode(imageNamed: "pizza")
+     //       sprite.name = "Pizza"
+     //       sprite.setScale(2)
+      //      obstacles.append(sprite)
+      //  }
 //        
 //        for _ in 1...3 {
 //            let sprite = SKSpriteNode(imageNamed: "cheese")
