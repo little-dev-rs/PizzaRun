@@ -246,7 +246,7 @@ extension GameScene {
                                   y: ground.frame.height + character.frame.height/2 - 25)
         characterPosY = character.position.y
 
-        character.physicsBody = SKPhysicsBody(rectangleOf: character.size)
+        character.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: character.size.width / 2, height: character.size.height))
         character.physicsBody?.allowsRotation = false
         character.physicsBody?.restitution = 0.0
         character.physicsBody?.affectedByGravity = false
@@ -256,7 +256,7 @@ extension GameScene {
         addChild(character)
 
         var textures: [SKTexture] = []
-        for i in 1...7 {
+        for i in 0...7{
             let texture = SKTexture(imageNamed: "cook\(i)")
             textures.append(texture)
         }
@@ -423,7 +423,7 @@ extension GameScene {
 
     func setupPizzaScore() {
         pizzaScoreNode = SKSpriteNode(imageNamed: "pizza_cropped")
-        pizzaScoreNode.setScale(1.5)
+        pizzaScoreNode.setScale(0.08)
         pizzaScoreNode.zPosition = 50.0 // ??
         pizzaScoreNode.position = CGPoint(x: cheeseScoreLabel.position.x + 130,
                                            y: playableRect.minY + 200)
