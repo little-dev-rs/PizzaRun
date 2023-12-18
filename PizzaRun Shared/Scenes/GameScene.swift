@@ -25,7 +25,7 @@ class GameScene: SKScene {
     
     var onGround = true
     var velocityY: CGFloat = 0.0
-    var gravity: CGFloat = 0.6
+    var gravity: CGFloat = 0.8
     var characterPosY: CGFloat =  0.0
     var pauseNode: SKSpriteNode!
     var containerNode = SKNode()
@@ -85,6 +85,7 @@ class GameScene: SKScene {
     var basilScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
     var cheeseScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
     var pizzaScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
+    var backgroundMusic: SKAudioNode!
     
     var playableRect: CGRect {
         let ratio: CGFloat
@@ -114,6 +115,10 @@ class GameScene: SKScene {
     // MARK: - Systems
     
     override func didMove(to view: SKView) {
+        if let musicURL = Bundle.main.url(forResource: "collection_", withExtension: "m4a") {
+            backgroundMusic = SKAudioNode(url: musicURL)
+            addChild(backgroundMusic)
+        }
         setupNodes()
     }
     
@@ -153,6 +158,7 @@ extension GameScene {
     
     func setupNodes() {
         createBackground()
+        createMount()
         createGround()
         spawnObstacles()
         createCharacter()
@@ -166,7 +172,7 @@ extension GameScene {
         setupCheeseScore()
         setupPizzaScore()
         physicsWorld.contactDelegate = self
-//        view?.showsPhysics = false
+        view?.showsPhysics = false
     }
     
     func setupPause() {
@@ -212,7 +218,7 @@ extension GameScene {
             addChild(background)
         }
     }
-    
+
     func createGround() {
         for i in 0...4 {
             ground = SKSpriteNode(imageNamed: "ground1")
@@ -229,19 +235,16 @@ extension GameScene {
     }
     
     func createMount() {
-        for i in 0...4 {
-            mount = SKSpriteNode(imageNamed: "mountns")
-            mount.name = "Mount"
-            mount.anchorPoint = ground.frame.origin
-            mount.position = CGPoint(x: CGFloat(i)*ground.frame.width, y: 0.0)
-            mount.zPosition = 6.0
-            addChild(mount)
-        }
+
+        mount = SKSpriteNode(imageNamed: "mountns")
+        mount.name = "Mount"
+        mount.anchorPoint = .zero
+        mount.position = CGPoint(x: cameraNode.frame.width/2, y: 400)
+        mount.zPosition = 1.0
+        addChild(mount)
     }
     
     func createCharacter() {
-//        character = creator.createSprite(model: viewModel.character)
-
         character = SKSpriteNode(imageNamed: "cook1")
         character.name = "Player"
         character.setScale(3)
@@ -260,7 +263,7 @@ extension GameScene {
         addChild(character)
 
         var textures: [SKTexture] = []
-        for i in 1...9 {
+        for i in 1...7 {
             let texture = SKTexture(imageNamed: "cook\(i)")
             textures.append(texture)
         }
@@ -276,6 +279,7 @@ extension GameScene {
     func moveCamera() {
         let amountToMove = CGPoint(x: cameraMovePointPerSecond * CGFloat(dt), y: 0.0)
         cameraNode.position +=  amountToMove
+        mount.position +=  amountToMove
         
         // Background
         enumerateChildNodes(withName: "Background") { (node, _) in
@@ -312,8 +316,9 @@ extension GameScene {
         let randomYPosition = Double(CGFloat.random(in: 500...600))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
                                   y: ground.frame.height + randomYPosition)
+        sprite.setScale(0.3)
         addChild(sprite)
-        
+ 
         var textures: [SKTexture] = []
         for i in 1...2 {
             let texture = SKTexture(imageNamed: "cloud\(i)")
@@ -323,7 +328,7 @@ extension GameScene {
     }
     
     func spawnClouds() {
-        let random = Double(CGFloat.random(in: 1.5 ... 2))
+        let random = Double(CGFloat.random(in: 1.5 ... 6))
         run(.repeatForever(.sequence([
             .wait(forDuration: random),
             .run { [weak self] in
