@@ -40,20 +40,13 @@ class GameScene: SKScene {
                 let removedNode = lifeNodes.removeLast()
                 removedNode.removeFromParent()
                 if lifeNodes.isEmpty {
-                    createPanel() // here show gameOver screen
-                    tomatoScoreNode.removeFromParent()
-                    tomatoScoreLabel.removeFromParent()
-                    basilScoreNode.removeFromParent()
-                    basilScoreLabel.removeFromParent()
-                    cheeseScoreNode.removeFromParent()
-                    cheeseScoreLabel.removeFromParent()
-//                    pizzaScoreNode.removeFromParent()
-//                    pizzaScoreLabel.removeFromParent()
+                    createPanel() // TODO: here show gameOver screen
+                    deleteNodesFromScreen()
                 }
             }
         }
     }
-    
+
     var pizzaCounter: Int = 0 {
         didSet {
             updateLabel(pizzaScoreLabel, to: pizzaCounter)
@@ -62,21 +55,20 @@ class GameScene: SKScene {
     
     var basilCounter: Int = 0 {
         didSet {
-            updateLabel(basilScoreLabel, to: basilCounter)
+            countIngridients()
         }
     }
     var cheeseCounter: Int = 0 {
         didSet {
-            updateLabel(cheeseScoreLabel, to: cheeseCounter)
+            countIngridients()
         }
     }
     var tomatoCounter: Int = 0 {
         didSet {
-          //  playBackgroundMusic(filename: "collection_.m4a")
-            updateLabel(tomatoScoreLabel, to: tomatoCounter)
+            countIngridients()
         }
     }
-    
+
     var tomatoScoreNode: SKSpriteNode!
     var basilScoreNode: SKSpriteNode!
     var cheeseScoreNode: SKSpriteNode!
@@ -258,7 +250,7 @@ extension GameScene {
                                   y: ground.frame.height + character.frame.height/2 - 25)
         characterPosY = character.position.y
 
-        character.physicsBody = SKPhysicsBody(rectangleOf: character.size)
+        character.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: character.size.width / 2, height: character.size.height))
         character.physicsBody?.allowsRotation = false
         character.physicsBody?.restitution = 0.0
         character.physicsBody?.affectedByGravity = false
@@ -268,7 +260,7 @@ extension GameScene {
         addChild(character)
 
         var textures: [SKTexture] = []
-        for i in 1...7 {
+        for i in 0...7{
             let texture = SKTexture(imageNamed: "cook\(i)")
             textures.append(texture)
         }
@@ -344,7 +336,6 @@ extension GameScene {
 
     func setupObstacles() {
         viewModel.obstacles.forEach { object in
-            print(viewModel.obstacles)
             for _ in 1...object.repeatCount {
                 let sprite = creator.createSprite(model: object)
                 obstacles.append(sprite)
@@ -437,7 +428,7 @@ extension GameScene {
 
     func setupPizzaScore() {
         pizzaScoreNode = SKSpriteNode(imageNamed: "pizza_cropped")
-        pizzaScoreNode.setScale(1.5)
+        pizzaScoreNode.setScale(0.08)
         pizzaScoreNode.zPosition = 50.0 // ??
         pizzaScoreNode.position = CGPoint(x: cheeseScoreLabel.position.x + 130,
                                            y: playableRect.minY + 200)
@@ -454,10 +445,7 @@ extension GameScene {
     }
 
     func spawnObstacles() {
-        // wait on start
-        run(.wait(forDuration: 5))
-        
-        let random = Double(CGFloat.random(in: 1.5 ... 3))//playTime))
+        let random = Double(CGFloat.random(in: 1.5 ... playTime))
         run(.repeatForever(.sequence([
             .wait(forDuration: random),
             .run { [weak self] in
@@ -468,6 +456,29 @@ extension GameScene {
     
     func updateLabel(_ label: SKLabelNode, to count: Int) {
         label.text = "\(count)"
+    }
+
+    func countIngridients() {
+        if cheeseCounter > 0 && tomatoCounter > 0 && basilCounter > 0 {
+            pizzaCounter += 1
+            cheeseCounter -= 1
+            tomatoCounter -= 1
+            basilCounter -= 1
+        }
+        updateLabel(basilScoreLabel, to: basilCounter)
+        updateLabel(cheeseScoreLabel, to: cheeseCounter)
+        updateLabel(tomatoScoreLabel, to: tomatoCounter)
+    }
+
+    func deleteNodesFromScreen() {
+        tomatoScoreNode.removeFromParent()
+        tomatoScoreLabel.removeFromParent()
+        basilScoreNode.removeFromParent()
+        basilScoreLabel.removeFromParent()
+        cheeseScoreNode.removeFromParent()
+        cheeseScoreLabel.removeFromParent()
+        pizzaScoreNode.removeFromParent()
+        pizzaScoreLabel.removeFromParent()
     }
 
 }
