@@ -72,6 +72,7 @@ class GameScene: SKScene {
     }
     var tomatoCounter: Int = 0 {
         didSet {
+          //  playBackgroundMusic(filename: "collection_.m4a")
             updateLabel(tomatoScoreLabel, to: tomatoCounter)
         }
     }
@@ -115,11 +116,15 @@ class GameScene: SKScene {
     // MARK: - Systems
     
     override func didMove(to view: SKView) {
-        if let musicURL = Bundle.main.url(forResource: "collection_", withExtension: "m4a") {
+        playBackgroundMusic(filename: "track.mp3")
+        setupNodes()
+    }
+    
+    func playBackgroundMusic(filename: String) {
+        if let musicURL = Bundle.main.url(forResource: filename, withExtension: nil) {
             backgroundMusic = SKAudioNode(url: musicURL)
             addChild(backgroundMusic)
         }
-        setupNodes()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -391,6 +396,7 @@ extension GameScene {
         tomatoScoreLabel.position = CGPoint(x: tomatoScoreNode.position.x + 60,
                                             y: playableRect.minY + 222)// + tomatoScoreNode.frame.height) //
         cameraNode.addChild(tomatoScoreLabel)
+        
     }
     
     func setupBasilScore() {
@@ -480,6 +486,7 @@ extension GameScene: SKPhysicsContactDelegate {
         case PhysicsCategory.Knife:
             lifeCounter -= 1
         case PhysicsCategory.Tomato:
+            
             tomatoCounter += 1
         case PhysicsCategory.Basil:
             basilCounter += 1

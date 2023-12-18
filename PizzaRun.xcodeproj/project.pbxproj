@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0240DB342B2B51E800E12441 /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0240DB332B2B51E800E12441 /* MainMenuScene.swift */; };
+		1214330C2B30A2A40007D14F /* MusicPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1214330B2B30A2A40007D14F /* MusicPlayer.swift */; };
+		121433102B30B5290007D14F /* track.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 1214330F2B30B5290007D14F /* track.mp3 */; };
 		779FD49A2B2B5FA400E245E3 /* PhysicsCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 779FD4992B2B5FA400E245E3 /* PhysicsCategory.swift */; };
 		779FD49C2B2C5A6900E245E3 /* GameObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 779FD49B2B2C5A6900E245E3 /* GameObject.swift */; };
 		779FD49E2B2C5A8500E245E3 /* ObjectCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 779FD49D2B2C5A8500E245E3 /* ObjectCreator.swift */; };
@@ -25,7 +27,8 @@
 
 /* Begin PBXFileReference section */
 		0240DB332B2B51E800E12441 /* MainMenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
-		121433082B3084F50007D14F /* collection_.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = collection_.m4a; sourceTree = "<group>"; };
+		1214330B2B30A2A40007D14F /* MusicPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicPlayer.swift; sourceTree = "<group>"; };
+		1214330F2B30B5290007D14F /* track.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = track.mp3; sourceTree = "<group>"; };
 		779FD4992B2B5FA400E245E3 /* PhysicsCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicsCategory.swift; sourceTree = "<group>"; };
 		779FD49B2B2C5A6900E245E3 /* GameObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameObject.swift; sourceTree = "<group>"; };
 		779FD49D2B2C5A8500E245E3 /* ObjectCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectCreator.swift; sourceTree = "<group>"; };
@@ -118,7 +121,8 @@
 				77C4995B2B285607000C3F18 /* Controllers */,
 				77D3765C2B27CF8F00F00A7B /* Main.storyboard */,
 				77D3765F2B27CF8F00F00A7B /* LaunchScreen.storyboard */,
-				121433082B3084F50007D14F /* collection_.m4a */,
+				1214330B2B30A2A40007D14F /* MusicPlayer.swift */,
+				1214330F2B30B5290007D14F /* track.mp3 */,
 			);
 			path = "PizzaRun iOS";
 			sourceTree = "<group>";
@@ -184,6 +188,7 @@
 			files = (
 				77D376632B27CF8F00F00A7B /* GameScene.sks in Resources */,
 				77D3765E2B27CF8F00F00A7B /* Main.storyboard in Resources */,
+				121433102B30B5290007D14F /* track.mp3 in Resources */,
 				77D376622B27CF8F00F00A7B /* Actions.sks in Resources */,
 				77D376612B27CF8F00F00A7B /* LaunchScreen.storyboard in Resources */,
 				77D376652B27CF8F00F00A7B /* Assets.xcassets in Resources */,
@@ -205,6 +210,7 @@
 				779FD49A2B2B5FA400E245E3 /* PhysicsCategory.swift in Sources */,
 				77D3765B2B27CF8F00F00A7B /* GameViewController.swift in Sources */,
 				77D376592B27CF8F00F00A7B /* AppDelegate.swift in Sources */,
+				1214330C2B30A2A40007D14F /* MusicPlayer.swift in Sources */,
 				779FD4A02B2C68DC00E245E3 /* GameSceneVM.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -347,7 +353,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8Z9KCUYRJ4;
+				DEVELOPMENT_TEAM = L6KVMS9Q3F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -361,7 +367,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.PizzaRun.PizzaRun;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PizzaRun.123;
 				PRODUCT_NAME = PizzaRun;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -377,7 +383,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8Z9KCUYRJ4;
+				DEVELOPMENT_TEAM = L6KVMS9Q3F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -391,7 +397,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.PizzaRun.PizzaRun;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PizzaRun.123;
 				PRODUCT_NAME = PizzaRun;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
