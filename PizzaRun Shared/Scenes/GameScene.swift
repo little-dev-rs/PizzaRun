@@ -40,7 +40,7 @@ class GameScene: SKScene {
                 let removedNode = lifeNodes.removeLast()
                 removedNode.removeFromParent()
                 if lifeNodes.isEmpty {
-                    createPanel() // TODO: here show gameOver screen
+                    updateCookToDied() // TODO: here show gameOver screen
                     deleteNodesFromScreen()
                 }
             }
@@ -266,7 +266,16 @@ extension GameScene {
         }
         character.run(.repeatForever(.animate(with: textures, timePerFrame: 0.083)))
     }
-    
+
+    func updateCookToDied() {
+        var textures: [SKTexture] = []
+        for i in 1...2 {
+            let texture = SKTexture(imageNamed: "cook-dead\(i)")
+            textures.append(texture)
+        }
+        character.run(.repeatForever(.animate(with: textures, timePerFrame: 0.083)))
+    }
+
     func setupCamera() {
         addChild(cameraNode)
         camera = cameraNode
