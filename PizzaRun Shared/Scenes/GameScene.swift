@@ -51,6 +51,7 @@ class GameScene: SKScene {
     var tomatoScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
     var basilScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
     var chaseScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
+    var backgroundMusic: SKAudioNode!
     
     var playableRect: CGRect {
         let ratio: CGFloat
@@ -80,6 +81,11 @@ class GameScene: SKScene {
     // MARK: - Systems
     
     override func didMove(to view: SKView) {
+        
+        if let musicURL = Bundle.main.url(forResource: "collection_", withExtension: "m4a") {
+                    backgroundMusic = SKAudioNode(url: musicURL)
+                    addChild(backgroundMusic)
+                }
         setupNodes()
     }
     
