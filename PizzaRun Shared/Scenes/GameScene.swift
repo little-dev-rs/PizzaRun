@@ -33,24 +33,58 @@ class GameScene: SKScene {
     let creator: Creator = ObjectCreator()
     let viewModel: GameSceneVM = GameSceneVM()
     
-    var pizzaCounter: Int = 0
-    var basilCounter: Int = 0
-    var cheeseCounter: Int = 0
-    var tomatoCounter: Int = 0
-    
     var lifeNodes: [SKSpriteNode] = []
-
-    var tomatoScore: Int = 0
-    var basilScore: Int = 0
-    var cheesescore: Int = 0
+    var lifeCounter: Int = 3 {
+        didSet {
+            if lifeNodes.isEmpty == false {
+                let removedNode = lifeNodes.removeLast()
+                removedNode.removeFromParent()
+                if lifeNodes.isEmpty {
+                    createPanel() // here show gameOver screen
+                    tomatoScoreNode.removeFromParent()
+                    tomatoScoreLabel.removeFromParent()
+                    basilScoreNode.removeFromParent()
+                    basilScoreLabel.removeFromParent()
+                    cheeseScoreNode.removeFromParent()
+                    cheeseScoreLabel.removeFromParent()
+//                    pizzaScoreNode.removeFromParent()
+//                    pizzaScoreLabel.removeFromParent()
+                }
+            }
+        }
+    }
+    
+    var pizzaCounter: Int = 0 {
+        didSet {
+            updateLabel(pizzaScoreLabel, to: pizzaCounter)
+        }
+    }
+    
+    var basilCounter: Int = 0 {
+        didSet {
+            updateLabel(basilScoreLabel, to: basilCounter)
+        }
+    }
+    var cheeseCounter: Int = 0 {
+        didSet {
+            updateLabel(cheeseScoreLabel, to: cheeseCounter)
+        }
+    }
+    var tomatoCounter: Int = 0 {
+        didSet {
+            updateLabel(tomatoScoreLabel, to: tomatoCounter)
+        }
+    }
     
     var tomatoScoreNode: SKSpriteNode!
     var basilScoreNode: SKSpriteNode!
     var cheeseScoreNode: SKSpriteNode!
+    var pizzaScoreNode: SKSpriteNode!
     
     var tomatoScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
     var basilScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
-    var chaseScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
+    var cheeseScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
+    var pizzaScoreLabel = SKLabelNode(fontNamed: "Krungthep" )
     var backgroundMusic: SKAudioNode!
     
     var playableRect: CGRect {
@@ -77,15 +111,14 @@ class GameScene: SKScene {
         
         return CGRect(x: x, y: y, width: width, height: height)
     }
-    
+
     // MARK: - Systems
     
     override func didMove(to view: SKView) {
-        
         if let musicURL = Bundle.main.url(forResource: "collection_", withExtension: "m4a") {
-                    backgroundMusic = SKAudioNode(url: musicURL)
-                    addChild(backgroundMusic)
-                }
+            backgroundMusic = SKAudioNode(url: musicURL)
+            addChild(backgroundMusic)
+        }
         setupNodes()
     }
     
@@ -137,12 +170,14 @@ extension GameScene {
         setupTomatoScore()
         setupBasilScore()
         setupCheeseScore()
+        setupPizzaScore()
         physicsWorld.contactDelegate = self
+        view?.showsPhysics = false
     }
     
     func setupPause() {
         pauseNode = SKSpriteNode(imageNamed: "pause")
-        pauseNode.setScale (0.5)
+        pauseNode.setScale (0.15)
         pauseNode.zPosition = 10
         pauseNode.name = "pause"
         pauseNode.position = CGPoint(x: playableRect.width/2.0 - pauseNode.frame.width/2.0 - 60.0,
@@ -183,7 +218,7 @@ extension GameScene {
             addChild(background)
         }
     }
-  
+
     func createGround() {
         for i in 0...4 {
             ground = SKSpriteNode(imageNamed: "ground1")
@@ -210,8 +245,6 @@ extension GameScene {
     }
     
     func createCharacter() {
-//        character = creator.createSprite(model: viewModel.character)
-
         character = SKSpriteNode(imageNamed: "cook1")
         character.name = "Player"
         character.setScale(3)
@@ -274,7 +307,11 @@ extension GameScene {
     }
     
     func setupClouds() {
-        let sprite = creator.createSprite(model: viewModel.cloud)
+        let cloudModel = viewModel.cloud
+        let sprite = SKSpriteNode(imageNamed: cloudModel.imageName)
+        sprite.name = cloudModel.name
+        sprite.setScale(cloudModel.scale)
+        sprite.zPosition = cloudModel.zPosition
         
         let randomYPosition = Double(CGFloat.random(in: 500...600))
         sprite.position = CGPoint(x: cameraRect.maxX + sprite.frame.width / 2.0,
@@ -301,14 +338,13 @@ extension GameScene {
     }
 
     func setupObstacles() {
-        
         viewModel.obstacles.forEach { object in
+            print(viewModel.obstacles)
             for _ in 1...object.repeatCount {
                 let sprite = creator.createSprite(model: object)
                 obstacles.append(sprite)
             }
         }
-
         let index = Int(arc4random_uniform(UInt32(obstacles.count - 1)))
         let sprite = obstacles[index].copy() as! SKSpriteNode
         let randomYPosition = Double(CGFloat.random(in: sprite.frame.height / 2 ... 450))
@@ -317,83 +353,98 @@ extension GameScene {
 
         addChild(sprite)
         sprite.run(.sequence([
-            .wait(forDuration: 10.0),
+            .wait(forDuration: 5.0),
             .removeFromParent()
         ]))
     }
 
     func setupLife() {
-        let node1 = SKSpriteNode(imageNamed: "life-on" )
-        let node2 = SKSpriteNode(imageNamed: "life-on" )
-        let node3 = SKSpriteNode(imageNamed: "life-on" )
-        setupLifePos (node1, iteration: 1.0)
-        setupLifePos (node2, iteration: 2.0)
-        setupLifePos (node3, iteration: 3.0)
-        lifeNodes.append(node1)
-        lifeNodes.append(node2)
-        lifeNodes.append(node3)
+        for i in 0...lifeCounter-1 {
+            let node = SKSpriteNode(imageNamed: "heart_cropped")
+            node.name = "Heart"
+            node.setScale(0.1)
+            node.zPosition = 11
+            node.anchorPoint = .zero
+            let iterationOffset = CGFloat(i*Int(node.frame.width) + i*10)
+            node.position = CGPoint(x: playableRect.minX - playableRect.width / 2 + iterationOffset + node.frame.width / 2,
+                                    y: playableRect.minY + 140)//node.frame.height)
+            lifeNodes.append(node)
+        }
+        lifeNodes.forEach { node in
+            cameraNode.addChild(node)
+        }
     }
-    
-    func setupLifePos(_ node: SKSpriteNode, iteration: CGFloat) {
-        node.setScale(0.5)
-        node.zPosition = 50.0
-        node.anchorPoint = .zero
-        node.position = CGPoint(x: -size.width / 2.0 + node.frame.width*iteration + 8*iteration, y: 350)
-        cameraNode.addChild(node)
-    }
-    
+
     func setupTomatoScore() {
         tomatoScoreNode = SKSpriteNode(imageNamed: "tomato")
         tomatoScoreNode.setScale(1)
-        tomatoScoreNode.zPosition = 50.0
-        tomatoScoreNode.position = CGPoint(x: -playableRect.width/2.0 + tomatoScoreNode.frame.width,
-                                           y: playableRect.height/3.5 - lifeNodes[0].frame.height - tomatoScoreNode.frame.height/3.5)
+        tomatoScoreNode.zPosition = 50.0 // ??
+        tomatoScoreNode.position = CGPoint(x: playableRect.minX,
+                                           y: playableRect.minY + 200)
         cameraNode.addChild(tomatoScoreNode)
-        
-        tomatoScoreLabel.text = "\(tomatoScore)"
+
+        tomatoScoreLabel.text = "\(tomatoCounter)"
         tomatoScoreLabel.fontSize = 60.0
         tomatoScoreLabel.horizontalAlignmentMode = .left
         tomatoScoreLabel.verticalAlignmentMode = .top
-        tomatoScoreLabel.zPosition = 50.0
-        tomatoScoreLabel.position = CGPoint(x: -playableRect.width/2.0 + tomatoScoreNode.frame.width*1.5 - 10.0,
-                                    y: tomatoScoreNode.position.y + tomatoScoreNode.frame.height/2.0 - 8.0)
+        tomatoScoreLabel.zPosition = 50.0 // ??
+        tomatoScoreLabel.position = CGPoint(x: tomatoScoreNode.position.x + 60,
+                                            y: playableRect.minY + 222)// + tomatoScoreNode.frame.height) //
         cameraNode.addChild(tomatoScoreLabel)
     }
     
     func setupBasilScore() {
-        basilScoreNode = SKSpriteNode(imageNamed: "basil")
-        basilScoreNode.setScale(1)
-        basilScoreNode.zPosition = 50.0
-        basilScoreNode.position = CGPoint(x: -playableRect.width/2.0 + basilScoreNode.frame.width,
-                                    y: playableRect.height/2.0 - lifeNodes[0].frame.height - basilScoreNode.frame.height/2.0)
+        basilScoreNode = SKSpriteNode(imageNamed: "basil_cropped")
+        basilScoreNode.setScale(1.3)
+        basilScoreNode.zPosition = 50.0 // ??
+        basilScoreNode.position = CGPoint(x: tomatoScoreLabel.position.x + 100,
+                                          y: playableRect.minY + 200)
         cameraNode.addChild(basilScoreNode)
-        
-        basilScoreLabel.text = "\(basilScore)"
+
+        basilScoreLabel.text = "\(basilCounter)"
         basilScoreLabel.fontSize = 60.0
         basilScoreLabel.horizontalAlignmentMode = .left
         basilScoreLabel.verticalAlignmentMode = .top
-        basilScoreLabel.zPosition = 50.0
-        basilScoreLabel.position = CGPoint(x: -playableRect.width/2.0 + basilScoreNode.frame.width*2.0 - 10.0,
-                                    y: basilScoreNode.position.y + basilScoreNode.frame.height/2.0 - 8.0)
+        basilScoreLabel.zPosition = 50.0 // ??
+        basilScoreLabel.position = CGPoint(x: basilScoreNode.position.x + 60,
+                                           y: playableRect.minY + 222)
         cameraNode.addChild(basilScoreLabel)
     }
     
     func setupCheeseScore() {
-        cheeseScoreNode = SKSpriteNode(imageNamed: "ananas")
-        cheeseScoreNode.setScale(1)
-        cheeseScoreNode.zPosition = 50.0
-        cheeseScoreNode.position = CGPoint(x: -playableRect.width/2.0 + cheeseScoreNode.frame.width,
-                                    y: playableRect.height/2.0 - lifeNodes[0].frame.height - cheeseScoreNode.frame.height/2.0)
-        cameraNode.addChild(cheeseScoreNode)
-        
-        chaseScoreLabel.text = "\(cheesescore)"
-        chaseScoreLabel.fontSize = 60.0
-        chaseScoreLabel.horizontalAlignmentMode = .left
-        chaseScoreLabel.verticalAlignmentMode = .top
-        chaseScoreLabel.zPosition = 50.0
-        chaseScoreLabel.position = CGPoint(x: -playableRect.width/2.0 + cheeseScoreNode.frame.width*2.0 - 10.0,
-                                    y: cheeseScoreNode.position.y + cheeseScoreNode.frame.height/2.0 - 8.0)
-        cameraNode.addChild(chaseScoreLabel)
+            cheeseScoreNode = SKSpriteNode(imageNamed: "cheese_cropped")
+            cheeseScoreNode.setScale(0.18)
+            cheeseScoreNode.zPosition = 50.0 // ??
+            cheeseScoreNode.position = CGPoint(x: basilScoreLabel.position.x + 100,
+                                               y: playableRect.minY + 200)
+            cameraNode.addChild(cheeseScoreNode)
+
+            cheeseScoreLabel.text = "\(cheeseCounter)"
+            cheeseScoreLabel.fontSize = 60.0
+            cheeseScoreLabel.horizontalAlignmentMode = .left
+            cheeseScoreLabel.verticalAlignmentMode = .top
+            cheeseScoreLabel.zPosition = 50.0 // ??
+            cheeseScoreLabel.position = CGPoint(x: cheeseScoreNode.position.x + 60,
+                                                y: playableRect.minY + 222)
+            cameraNode.addChild(cheeseScoreLabel)
+    }
+
+    func setupPizzaScore() {
+        pizzaScoreNode = SKSpriteNode(imageNamed: "pizza_cropped")
+        pizzaScoreNode.setScale(1.5)
+        pizzaScoreNode.zPosition = 50.0 // ??
+        pizzaScoreNode.position = CGPoint(x: cheeseScoreLabel.position.x + 130,
+                                           y: playableRect.minY + 200)
+        cameraNode.addChild(pizzaScoreNode)
+
+        pizzaScoreLabel.text = "\(pizzaCounter)"
+        pizzaScoreLabel.fontSize = 60.0
+        pizzaScoreLabel.horizontalAlignmentMode = .left
+        pizzaScoreLabel.verticalAlignmentMode = .top
+        pizzaScoreLabel.zPosition = 50.0 // ??
+        pizzaScoreLabel.position = CGPoint(x: pizzaScoreNode.position.x + 90,
+                                            y: playableRect.minY + 222)
+        cameraNode.addChild(pizzaScoreLabel)
     }
 
     func spawnObstacles() {
@@ -409,33 +460,35 @@ extension GameScene {
         ])))
     }
     
+    func updateLabel(_ label: SKLabelNode, to count: Int) {
+        label.text = "\(count)"
+    }
+
 }
 
 extension GameScene: SKPhysicsContactDelegate {
 
     func didBegin(_ contact: SKPhysicsContact) {
-        print("test1 didBegin")
         let object = contact.bodyA.categoryBitMask == PhysicsCategory.Character ? contact.bodyB : contact.bodyA
         
-        print("test1 categoryBitMask \(object.categoryBitMask)")
         if let node = object.node {
             node.removeFromParent()
         }
         switch object.categoryBitMask {
         case PhysicsCategory.Ananas:
             cameraMovePointPerSecond += 150.0
-        case PhysicsCategory.Character:
-            print("test1 Character")
         case PhysicsCategory.Knife:
-            print("test1 Knife")
-        case PhysicsCategory.Ananas:
-            print("test1 Ingridient")
-        case PhysicsCategory.Cloud:
-            print("test1 Cloud")
-        case PhysicsCategory.Ground:
-            print("test1 Ground")
+            lifeCounter -= 1
+        case PhysicsCategory.Tomato:
+            tomatoCounter += 1
+        case PhysicsCategory.Basil:
+            basilCounter += 1
+        case PhysicsCategory.Cheese:
+            cheeseCounter += 1
+        case PhysicsCategory.Pizza:
+            pizzaCounter += 1
         default:
-            print("test1 default")
+            return
         }
     }
     
@@ -447,7 +500,7 @@ extension GameScene {
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        if velocityY < -12.5{
+        if velocityY < -12.5 {
             velocityY = -12.5
         }
     }
