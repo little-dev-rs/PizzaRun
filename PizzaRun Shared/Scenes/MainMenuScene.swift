@@ -12,16 +12,19 @@ class MainMenu: SKScene {
     //MARK: - Systems
     override func didMove(to view: SKView) {
         setupBG()
+        setupTitle()
+        setUpMount()
         setupGrounds()
-        
+        setupGrounds2()
+        setupNodes()
     }
-    override func update(_ currentTime: TimeInterval) {
-        moveGrounds()
-    }
-}
-//MARK: - Configuration
-
-extension MainMenu{
+    /*
+     }
+     override func update(_ currentTime: TimeInterval) {
+     moveGrounds()
+     
+     }*/
+    
     
     func setupBG() {
         let bgNode = SKSpriteNode(imageNamed: ("sky"))
@@ -32,49 +35,72 @@ extension MainMenu{
     }
     
     func setupGrounds() {
-        for i in 0 ... 2 {
-            let groundNode = SKSpriteNode(imageNamed: "ground1")
-            groundNode.name = "Ground"
-            groundNode.anchorPoint = .zero
-            groundNode.zPosition = 0.0
-            groundNode.position = CGPoint(x: -CGFloat(i)*groundNode.frame.width, y: 0.0)
-            
-        }
+        
+        let groundNode = SKSpriteNode(imageNamed: "ground1")
+        groundNode.name = "Ground"
+        groundNode.anchorPoint = .zero
+        groundNode.zPosition = 0.0
+        groundNode.position = CGPoint(x: 0.0, y: 0.0)
+        addChild(groundNode)
+        
     }
-    
-    func moveGrounds() {
-        enumerateChildNodes(withName: "Ground") { (node, _) in
-            let node = node as! SKSpriteNode
-            node.position.x -= 8.0
-            
-            if node.position.x < -self.frame.width {
-                node.position.x += node.frame.width*2.0
-            }
-            
-        }
+    func setupGrounds2() {
+        
+        let groundNode = SKSpriteNode(imageNamed: "ground1")
+        groundNode.name = "Ground"
+        groundNode.anchorPoint = .zero
+        groundNode.zPosition = 0.0
+        groundNode.position = CGPoint(x: 1040, y: 0.0)
+        addChild(groundNode)
+        
     }
-    
+    func setUpMount() {
+        var mount: SKSpriteNode!
+        mount = SKSpriteNode(imageNamed: "mountns")
+        mount.name = "Mount"
+        mount.anchorPoint = .zero
+        mount.position = CGPoint(x: 0.0, y: 400)
+        mount.zPosition = -0.5
+        addChild(mount)
+    }
+    func setupTitle(){
+        let title = SKSpriteNode(imageNamed: "screentitle")
+        title.name = "screentitle"
+        title.setScale (0.5)
+        title.zPosition = 2.0
+        title.position = CGPoint(x: size.width / 2 - 50, y: size.height / 2 + 290)
+        addChild (title)
+    }
     func setupNodes() {
-    let play = SKSpriteNode(imageNamed: "play")
-    play.name = "play"
-    play.setScale (1)
-    play.zPosition = 10.0
-    play.position = CGPoint(x: size.width/2.0, y: size.height/2.0 - play.size.height - 50.0)
-    addChild (play)
-                            
-    let highscore = SKSpriteNode(imageNamed: "highscore")
-    highscore.name = "highscore"
-    highscore.setScale (0.85)
-    highscore.zPosition = 10.0
-    highscore.position = CGPoint(x: size.width/2.0, y: size.height/2.0 - highscore.size.height - 50.0)
-    addChild (highscore)
-                                 
-    let setting = SKSpriteNode(imageNamed: "settings" )
-    setting.name = "setting"
-    setting.setScale(0.85)
-    setting.zPosition = 10.0
-    setting.position = CGPoint(x: size.width/2.0, y: size.height/2.0 - setting.size.height - 50.0)
-    addChild(setting)
-                                 
+        let play = SKSpriteNode(imageNamed: "play")
+        play.name = "play"
+        play.setScale (0.5)
+        play.zPosition = 2.0
+        play.position = CGPoint(x: size.width / 2 + 200, y: size.height / 2 - 25)
+        
+        //  play.position = CGPoint(x: size.width / 2 - 200, y: size.height / 2 - 25)
+        addChild (play)
+        
+        let highscore = SKSpriteNode(imageNamed: "highscore")
+        highscore.name = "highscore"
+        highscore.setScale (0.5)
+        highscore.zPosition = 2.0
+        highscore.position = CGPoint(x: size.width / 2 - 250, y: size.height / 2 - 25)
+        //highscore.position = CGPoint(x: size.width / 2 + 200, y: size.height / 2 - 25)
+        addChild (highscore)
+        
+        
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let touchLocation = touch.location(in: self)
+        let touchedNode = self.atPoint(touchLocation)
+        
+        if touchedNode.name == "play" {
+            let gameScene = GameScene(size: self.size)
+            gameScene.scaleMode = .aspectFill
+            self.view?.presentScene(gameScene, transition: .crossFade(withDuration: 0.5))
+        }
     }
 }

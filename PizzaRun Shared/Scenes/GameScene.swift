@@ -136,7 +136,7 @@ class GameScene: SKScene {
             isPaused = false
             
         }else if node.name == "quit" {
-            
+            goToMainMenu()
         } else {
             if !isPaused {
                 if onGround {
@@ -152,6 +152,18 @@ class GameScene: SKScene {
 // MARK: - Configuration
 
 extension GameScene {
+    
+    func goToMainMenu() {
+         if let view = self.view {
+             // Create an instance of the MainMenu scene
+             let mainMenuScene = MainMenu(size: self.size)
+             mainMenuScene.scaleMode = .aspectFill
+             
+             // Transition back to the MainMenu scene
+             view.presentScene(mainMenuScene, transition: .crossFade(withDuration: 0.5))
+         }
+     }
+    
     
     func setupNodes() {
         createBackground()
@@ -193,14 +205,14 @@ extension GameScene {
         let resume = SKSpriteNode(imageNamed: "resume" )
         resume.zPosition = 30
         resume.name = "resume"
-        resume.setScale(0.7)
+        resume.setScale(0.5)
         resume.position = CGPoint(x: -panel.frame.width/2.0 + resume.frame.width*1.5, y: 0.0)
         panel.addChild(resume)
         
         let quit = SKSpriteNode(imageNamed: "back")
         quit.zPosition = 70.0
         quit.name = "quit"
-        quit.setScale(0.7)
+        quit.setScale(0.5)
         quit.position = CGPoint(x: panel.frame.width/2.0 - quit.frame.width*1.5, y: 0.0)
         panel.addChild(quit)
     }
@@ -517,6 +529,7 @@ extension GameScene: SKPhysicsContactDelegate {
         default:
             return
         }
+        
     }
     
 }
